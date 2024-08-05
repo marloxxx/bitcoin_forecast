@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Bitcoin Price Predictions (June 1st - July 01st, 2024)</h1>
+  </div>
+
+  <!-- Content Row -->
+
+  <div class="card shadow mb-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-primary">Bitcoin Price Predictions (June 1st - July 01st, 2024)</h6>
+      <div class="dropdown no-arrow">
+        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+          <div class="dropdown-header">Dropdown Header:</div>
+          <a class="dropdown-item" href="#">Action</a>
+          <a class="dropdown-item" href="#">Another action</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Something else here</a>
+        </div>
+      </div>
+    </div>
+    <!-- Card Body -->
+    <div class="card-body">
+      <div class="chart-area">
+        <canvas id="predictionChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- table -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Harga Bitcoin Hari Ini</h6>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Actual Close</th>
+              <th>LSTM Prediction</th>
+              <th>XGBoost Prediction</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in table_data %}
+            <tr>
+              <td>{{ item.date }}</td>
+              <td>{{ item.actual_close }}</td>
+              <td>{{ item.lstm_prediction }}</td>
+              <td>{{ item.pso_xgboost_prediction }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /.container-fluid -->
+{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script>
+  var ctx = document.getElementById("predictionChart");
+  var labels = '{% for item in date %}{{ item }}, {% endfor %}';
+  labels = labels.split(',').filter(function (el) {
+    return el != "";
+  });
+
+  var close = '{% for item in actual_close %}{{ item }}, {% endfor %}';
+  close = close.split(',').filter(function (el) {
+    return el != "";
+  });
+
+  var lstmPredictions = '{% for item in lstm_predictions %}{{ item }}, {% endfor %}';
+  lstmPredictions = lstmPredictions.split(',').filter(function (el) {
+    return el != "";
+  });
+
+  var psoXgboostPredictions = '{% for item in pso_xgboost_predictions %}{{ item }}, {% endfor %}';
+  psoXgboostPredictions = psoXgboostPredictions.split(',').filter(function (el) {
+    return el != "";
+  });
+
+  // Remove last elements if necessary
+  labels.pop();
+  close.pop();
+  lstmPredictions.pop();
+  psoXgboostPredictions.pop();
+
+  var myLineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+          label: "Bitcoin Price",
+          lineTension: 0.3,
+          backgroundColor: "rgba(78, 115, 223, 0.05)",
+          borderColor: "rgba(78, 115, 223, 1)",
+          pointRadius: 3,
+          pointBackgroundColor: "rgba(78, 115, 223, 1)",
+          pointBorderColor: "rgba(78, 115, 223, 1)",
+          pointHoverRadius: 3,
+          pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+          pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+          pointHitRadius: 10,
+          pointBorderWidth: 2,
+          data: close,
+        },
+        {
+          label: "Predicted LSTM",
+          lineTension: 0.3,
+          backgroundColor: "rgba(54, 185, 204, 0.05)",
+          borderColor: "rgba(54, 185, 204, 1)",
+          pointRadius: 3,
+          pointBackgroundColor: "rgba(54, 185, 204, 1)",
+          pointBorderColor: "rgba(54, 185, 204, 1)",
+          pointHoverRadius: 3,
+          pointHoverBackgroundColor: "rgba(54, 185, 204, 1)",
+          pointHoverBorderColor: "rgba(54, 185, 204, 1)",
+          pointHitRadius: 10,
+          pointBorderWidth: 2,
+          data: lstmPredictions,
+        },
+        {
+          label: "Predicted XGBoost",
+          lineTension: 0.3,
+          backgroundColor: "rgba(255, 99, 132, 0.05)",
+          borderColor: "rgba(255, 99, 132, 1)",
+          pointRadius: 3,
+          pointBackgroundColor: "rgba(255, 99, 132, 1)",
+          pointBorderColor: "rgba(255, 99, 132, 1)",
+          pointHoverRadius: 3,
+          pointHoverBackgroundColor: "rgba(255, 99, 132, 1)",
+          pointHoverBorderColor: "rgba(255, 99, 132, 1)",
+          pointHitRadius: 10,
+          pointBorderWidth: 2,
+          data: psoXgboostPredictions,
+        }
+      ],
+    },
+    options: {
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          left: 10,
+          right: 25,
+          top: 25,
+          bottom: 0
+        }
+      },
+      scales: {
+        xAxes: [{
+          time: {
+            unit: 'date'
+          },
+          gridLines: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            maxTicksLimit: labels.length,
+          }
+        }],
+        yAxes: [{
+          ticks: {
+            maxTicksLimit: 5,
+            padding: 10,
+            callback: function (value, index, values) {
+              return 'Rp.' + number_format(value);
+            }
+          },
+          gridLines: {
+            color: "rgb(234, 236, 244)",
+            zeroLineColor: "rgb(234, 236, 244)",
+            drawBorder: false,
+            borderDash: [2],
+            zeroLineBorderDash: [2]
+          }
+        }],
+      },
+      legend: {
+        display: true
+      },
+      tooltips: {
+        backgroundColor: "rgb(255,255,255)",
+        bodyFontColor: "#858796",
+        titleMarginBottom: 10,
+        titleFontColor: '#6e707e',
+        titleFontSize: 14,
+        borderColor: '#dddfeb',
+        borderWidth: 1,
+        xPadding: 15,
+        yPadding: 15,
+        displayColors: false,
+        intersect: false,
+        mode: 'index',
+        caretPadding: 10,
+        callbacks: {
+          label: function (tooltipItem, chart) {
+            var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+            return datasetLabel + ': Rp' + number_format(tooltipItem.yLabel);
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}
