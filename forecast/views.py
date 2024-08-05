@@ -30,8 +30,7 @@ def lstm_prediction(request):
     predictions = lstm_predict(data, 15, prediction_days)
 
     # Generate date for the next 7 days
-    # add 1 day to get 7 days
-    start_date = datetime.datetime.now() + datetime.timedelta(days=1)
+    start_date = datetime.datetime.now()
     date = pd.date_range(
         start=start_date, periods=prediction_days).tolist()
 
@@ -71,8 +70,7 @@ def pso_xgboost_prediction(request):
     predictions = pso_xgboost_predict(data, 15, prediction_days)
 
     # Generate date for the next 7 days from now
-    # add 1 day to get 7 days
-    start_date = datetime.datetime.now() + datetime.timedelta(days=1)
+    start_date = datetime.datetime.now()
     date = pd.date_range(
         start=start_date, periods=prediction_days).tolist()
 
